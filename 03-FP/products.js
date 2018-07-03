@@ -118,22 +118,61 @@ describe('Sort', function(){
 describe('Filter', function(){
 	describe('Filter stationary products', function(){
 		function filterStationaryProducts(){
-
+			var result = [];
+			for(var index = 0, count = products.length; index < count; index++){
+				if (products[index].category === 'stationary')
+					result.push(products[index]);
+			}
+			return result;
 		}
 		var stationaryProducts = filterStationaryProducts();
 		console.table(stationaryProducts);
 	})
 	describe('Filter any list by any criteria', function(){
-		function filter(){
-
+		function filter(list, criteriaFn){
+			var result = [];
+			for(var index = 0, count = list.length; index < count; index++){
+				if (criteriaFn(list[index]))
+					result.push(list[index]);
+			}
+			return result;
 		}
-		describe('Filter costly products [cost > 50]', function(){
-			var costlyProducts = filter(/*....*/);
-			console.table(products);
-		});
-		describe('Filter understocked products [units < 50]', function(){
-			var understockedProducts = filter(/*.....*/);
-			console.table(understockedProducts);
-		});
+		function negate(criteriaFn){
+			return function(){
+				return !criteriaFn.apply(undefined, arguments);
+			}
+		}
+		describe('Products By cost', function(){
+			var costlyProductCriteria = function(product){
+				return product.cost > 50;
+			}
+			describe('Costly products [cost > 50]', function(){
+				
+				var costlyProducts = filter(products, costlyProductCriteria);
+				console.table(costlyProducts);
+			});
+			describe('Affordable products [cost <= 50]', function(){
+				/*var affordableProductCriteria = function(product){
+					return !costlyProductCriteria(product);
+				}*/
+				var affordableProductCriteria = negate(costlyProductCriteria);
+				var affordableProducts = filter(products, affordableProductCriteria);
+				console.table(affordableProducts);
+			});
+		})
+		describe('Products by units', function(){
+			var understockedProductCriteria = function(product){
+				return product.units < 50;
+			}
+			describe('Understocked products [units < 50]', function(){
+				var understockedProducts = filter(products, understockedProductCriteria);
+				console.table(understockedProducts);
+			});
+			describe('Overstocked products [units >= 50]', function(){
+				var overstockedProductCriteria = negate(understockedProductCriteria);
+				var overstockedProducts = filter(products, overstockedProductCriteria);
+				console.table(overstockedProducts);
+			});
+		})
 	})
 });
