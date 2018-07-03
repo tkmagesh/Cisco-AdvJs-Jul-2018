@@ -176,3 +176,47 @@ describe('Filter', function(){
 		})
 	})
 });
+
+describe('GroupBy', function(){
+	function describeGroup(groupedObj){
+		for(var key in groupedObj){
+			describe('Key - [' + key + ']', function(){
+				console.table(groupedObj[key]);
+			});
+		}
+	}
+	describe('products by category', function(){
+		function groupProductsByCategory(){
+			var result = {};
+			for(var index = 0, count = products.length; index < count; index++){
+				var key = products[index].category;
+				if (typeof result[key] === 'undefined')
+					result[key] = [];
+				result[key].push(products[index]);
+			}
+			return result;
+		}
+		var productsByCategory = groupProductsByCategory();
+		describeGroup(productsByCategory);
+	});
+	describe('Any list by any key', function(){
+		function groupBy(list, keySelectorFn){
+			var result = {};
+			for(var index = 0, count = list.length; index < count; index++){
+				var key = keySelectorFn(list[index]);
+				if (typeof result[key] === 'undefined')
+					result[key] = [];
+				result[key].push(list[index]);
+			}
+			return result;
+		}
+		
+		describe('Products by cost', function(){
+			function costKeySelector(product){
+				return product.cost < 50 ? 'affordable' : 'costly';
+			};
+			var productsByCost = groupBy(products, costKeySelector);
+			describeGroup(productsByCost);
+		});
+	});
+});
